@@ -1,80 +1,76 @@
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
+import 'package:quiz_app/controllers/quiz_controller.dart';
 import 'package:quiz_app/model/quiz.dart';
+import 'package:quiz_app/widgets/quiz_widgets.dart';
 
-class QuizScreen extends StatefulWidget {
-  final Quiz quiz;
-
-  QuizScreen({required this.quiz});
+class Homepage extends StatefulWidget {
+  const Homepage({super.key});
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<Homepage> createState() => _HomepageState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
-  int _currentQuestionIndex = 0;
-  int _score = 0;
+class _HomepageState extends State<Homepage> {
+  int currentIndex = 0;
+  Map<int, int> selectedAnswers = {};
 
-  void _answerQuestion(int selectedOptionIndex) {
-    if (selectedOptionIndex ==
-        widget.quiz.questions[_currentQuestionIndex].correctOptionIndex) {
-      _score++;
-    }
-
-    setState(() {
-      if (_currentQuestionIndex < widget.quiz.questions.length - 1) {
-        _currentQuestionIndex++;
-      } else {
-        // Quiz is completed
-        _showScoreDialog();
-      }
-    });
+  void _nextQuestion() {
+    pagecontroller.nextPage(
+        duration: const Duration(seconds: 3), curve: Curves.easeIn);
   }
 
-  void _showScoreDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Quiz Completed'),
-          content:
-              Text('Your score is $_score/${widget.quiz.questions.length}'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
+  final pagecontroller = PageController();
   @override
   Widget build(BuildContext context) {
-    Question currentQuestion = widget.quiz.questions[_currentQuestionIndex];
-
+    final controller = context.read<Productcontroller>();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.quiz.title),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              currentQuestion.questionText,
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 20),
-            for (int i = 0; i < currentQuestion.options.length; i++)
-              ElevatedButton(
-                onPressed: () => _answerQuestion(i),
-                child: Text(currentQuestion.options[i]),
-              ),
-          ],
+      backgroundColor: Colors.deepPurple.shade300,
+      body: SafeArea(
+        child: StreamBuilder(
+          stream: controller.list,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.data == null) {
+              return const Center(
+                child: Text("Mahsulotlar mavjud emas"),
+              );
+            }
+            final products = snapshot.data!.docs;
+
+            return products.isEmpty
+                ? const Center(
+                    child: Text("Mahsulotlar mavjud emas"),
+                  )
+                : Center(
+                    child: PageView.builder(
+                      physics:
+                          const ScrollPhysics(parent: BouncingScrollPhysics()),
+                      itemCount: products.length,
+                      controller: pagecontroller,
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        final product =
+                            Product.fromJson(snapshot.data!.docs[index]);
+                        final question = product.question;
+                        final answers = product.answers;
+                        int correctanswer = product.correct;
+
+                        return Pageviewbuilder(
+                            answers: answers,
+                            question: question,
+                            index: index,
+                            correct: correctanswer,
+                            nextquestion: _nextQuestion);
+                      },
+                    ),
+                  );
+          },
         ),
       ),
     );

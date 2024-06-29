@@ -1,90 +1,35 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:quiz_app/adminpanel/admin.dart';
-import 'package:quiz_app/model/quiz.dart';
-import 'package:quiz_app/model/quiz_list.dart';
 
-void main() {
-  runApp(MyApp());
+import 'package:provider/provider.dart';
+import 'package:quiz_app/controllers/quiz_controller.dart';
+import 'package:quiz_app/firebase_options.dart';
+import 'package:quiz_app/screen/quiz_screen.dart';
+
+void main(List<String> args) {
+  WidgetsFlutterBinding.ensureInitialized();
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  runApp(const Myapp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  List<Quiz> _quizzes = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Quiz App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomeScreen(
-        quizzes: _quizzes,
-        onAddQuiz: (quiz) {
-          setState(() {
-            _quizzes.add(quiz);
-          });
-        },
-        onDeleteQuiz: (index) {
-          setState(() {
-            _quizzes.removeAt(index);
-          });
-        },
-      ),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  final List<Quiz> quizzes;
-  final Function(Quiz) onAddQuiz;
-  final Function(int) onDeleteQuiz;
-
-  HomeScreen({
-    required this.quizzes,
-    required this.onAddQuiz,
-    required this.onDeleteQuiz,
-  });
+class Myapp extends StatelessWidget {
+  const Myapp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Quiz App'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdminPanel(quizzes: quizzes),
-                  ),
-                );
-              },
-              child: Text('Admin Panel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizListScreen(quizzes: quizzes),
-                  ),
-                );
-              },
-              child: Text('Take a Quiz'),
-            ),
-          ],
-        ),
-      ),
-    );
+    return ChangeNotifierProvider(create: (context) {
+      return Productcontroller();
+    }, builder: (context, child) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        )),
+        home: const Homepage(),
+      );
+    });
   }
 }

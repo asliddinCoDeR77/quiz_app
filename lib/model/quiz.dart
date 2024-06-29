@@ -1,18 +1,22 @@
-class Quiz {
-  final String title;
-  final List<Question> questions;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-  Quiz({required this.title, required this.questions});
-}
+class Product {
+  String id;
+  String question;
+  List<dynamic> answers;
+  int correct;
+  Product(
+      {required this.id,
+      required this.answers,
+      required this.question,
+      required this.correct});
 
-class Question {
-  final String questionText;
-  final List<String> options;
-  final int correctOptionIndex;
-
-  Question({
-    required this.questionText,
-    required this.options,
-    required this.correctOptionIndex,
-  });
+  factory Product.fromJson(QueryDocumentSnapshot query) {
+    return Product(
+      id: query.id,
+      answers: query['answers'],
+      correct: query['correct'],
+      question: query['question'],
+    );
+  }
 }
