@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:quiz_app/admin_panel/admin.dart';
 import 'package:quiz_app/controllers/quiz_controller.dart';
 import 'package:quiz_app/model/quiz.dart';
 import 'package:quiz_app/widgets/quiz_widgets.dart';
@@ -27,6 +28,7 @@ class _HomepageState extends State<Homepage> {
     final controller = context.read<Productcontroller>();
     return Scaffold(
       backgroundColor: Colors.deepPurple.shade300,
+      appBar: AppBar(),
       body: SafeArea(
         child: StreamBuilder(
           stream: controller.list,
@@ -71,6 +73,19 @@ class _HomepageState extends State<Homepage> {
                     ),
                   );
           },
+        ),
+      ),
+      drawer: Drawer(
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AdminPanel()),
+            );
+          },
+          child: ListTile(
+            title: Text('Admin Panel'),
+          ),
         ),
       ),
     );

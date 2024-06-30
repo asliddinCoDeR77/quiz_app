@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:quiz_app/controllers/quiz_controller.dart';
-import 'package:quiz_app/firebase_options.dart';
 import 'package:quiz_app/screen/quiz_screen.dart';
 
-void main(List<String> args) {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  await Firebase.initializeApp();
   runApp(const Myapp());
 }
 
