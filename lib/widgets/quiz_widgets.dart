@@ -15,6 +15,7 @@ class Pageviewbuilder extends StatefulWidget {
     required this.index,
     required this.nextquestion,
     required this.correct,
+    required void Function() incrementScore,
   });
 
   @override

@@ -3,6 +3,7 @@ import 'package:quiz_app/model/quiz.dart';
 
 class QuizFirebaseService {
   final _quizController = FirebaseFirestore.instance.collection('products');
+  final _scoresController = FirebaseFirestore.instance.collection('scores');
 
   Stream<QuerySnapshot> getProduct() async* {
     yield* _quizController.snapshots();
@@ -26,5 +27,15 @@ class QuizFirebaseService {
 
   Future<void> deleteQuestion(String id) async {
     await _quizController.doc(id).delete();
+  }
+
+  Future<void> updateScore(String userId, int score) async {
+    await _scoresController.doc(userId).set({
+      'score': score,
+    }, SetOptions(merge: true));
+  }
+
+  Stream<QuerySnapshot> getScores() async* {
+    yield* _scoresController.orderBy('score', descending: true).snapshots();
   }
 }

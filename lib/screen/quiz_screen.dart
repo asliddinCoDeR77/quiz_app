@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:quiz_app/admin_panel/admin.dart';
 import 'package:quiz_app/controllers/quiz_controller.dart';
 import 'package:quiz_app/model/quiz.dart';
+import 'package:quiz_app/screen/leabordsscreen.dart';
+import 'package:quiz_app/services/quiz_services.dart';
 import 'package:quiz_app/widgets/quiz_widgets.dart';
 
 class Homepage extends StatefulWidget {
@@ -16,19 +19,49 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   int currentIndex = 0;
   Map<int, int> selectedAnswers = {};
+  int score = 0;
+
+  final pagecontroller = PageController();
 
   void _nextQuestion() {
     pagecontroller.nextPage(
         duration: const Duration(seconds: 3), curve: Curves.easeIn);
   }
 
-  final pagecontroller = PageController();
+  void _incrementScore() {
+    setState(() {
+      score++;
+    });
+
+    // Get the current user ID
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final userId = user.uid;
+      // Update the score in Firestore
+      final controller = context.read<QuizFirebaseService>();
+      controller.updateScore(userId, score);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.read<Productcontroller>();
     return Scaffold(
       backgroundColor: Colors.deepPurple.shade300,
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.leaderboard),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LeaderboardScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: StreamBuilder(
           stream: controller.list,
@@ -68,7 +101,9 @@ class _HomepageState extends State<Homepage> {
                             question: question,
                             index: index,
                             correct: correctanswer,
-                            nextquestion: _nextQuestion);
+                            nextquestion: _nextQuestion,
+                            incrementScore:
+                                _incrementScore); // Pass incrementScore function
                       },
                     ),
                   );
